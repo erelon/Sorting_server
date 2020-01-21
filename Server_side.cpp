@@ -4,7 +4,7 @@
 
 #include <thread>
 #include <sstream>
-#include "server_side.h"
+#include "Server_side.h"
 
 int open_server(int port, sockaddr_in *p_in) {
   //create socket

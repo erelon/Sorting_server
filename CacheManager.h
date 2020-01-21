@@ -4,7 +4,7 @@
 
 #ifndef SORTING_SERVER__CACHEMANAGER_H_
 #define SORTING_SERVER__CACHEMANAGER_H_
-#include "server_side.h"
+#include "Server_side.h"
 
 template<class Problem, class Solution>
 class CacheManager {

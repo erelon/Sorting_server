@@ -1,9 +1,9 @@
 //
 // Created by erelon on 1/19/20.
 //
-#include "server_side.h"
+#include "Server_side.h"
 #include "Matrix.h"
-#include "search_algorithems/serach_algorithems.h"
+#include "search_algorithems/Search_algorithems.h"
 
 int main(int argc, char *argv[]) {
   //boot::Main main1;
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   Matrix<double> mat(5, 5, test);
   std::cout << to_string(mat) << std::endl;
 
-  SearchableMatrix<Point, double> sm(mat, start, end);
+  Searchable_Matrix<Point, double> sm(mat, start, end);
   //BFS::BFS<Point,std::string> work;
   //work.search(sm);
   int x = 0;

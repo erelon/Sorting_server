@@ -33,7 +33,7 @@ class Point {
   }
 };
 
-//T must have a cost with getCost() func
+//T must have a cost with get_Cost() func
 template<class T>
 class Matrix {
  private:

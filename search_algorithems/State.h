@@ -11,25 +11,25 @@ class State {
  private:
   T state;
   double cost;
-  State<T> *cameFrom;
+  State<T> *came_From;
  public:
-  double getCost() { return cost; }
-  State<T>() { this->cameFrom = NULL; }
-  State(T state, double cost, State<T> *cameFrom) {
+  double get_Cost() { return cost; }
+  State<T>() { this->came_From = NULL; }
+  State(T state, double cost, State<T> *came_From) {
     this->state = state;
     this->cost = cost;
-    this->cameFrom = cameFrom;
+    this->came_From = came_From;
     //add the new State
   }
   bool operator==(const State<T> &s) const { return to_string(state) == to_string(s.state); }
-  T getState() { return this->state; }
-  friend std::string to_string(State<T> &t) { return std::to_string(t.getCost()); }
+  T get_State() { return this->state; }
+  friend std::string to_string(State<T> &t) { return std::to_string(t.get_Cost()); }
 };
 
 template<class T>
 struct std::hash<State<T>> {
   size_t operator()(const State<T> &obj) const {
-    return hash<int>()(obj.getCost());
+    return hash<int>()(obj.get_Cost());
   }
 };
 
