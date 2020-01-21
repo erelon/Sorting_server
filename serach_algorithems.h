@@ -21,6 +21,7 @@ class State {
     this->state = state;
     this->cost = cost;
     this->cameFrom = cameFrom;
+    //add the new State
   }
   bool operator==(const State<T> &s) const { return to_string(state) == to_string(s.state); }
   T getState() { return this->state; }
@@ -44,16 +45,16 @@ class Searchable {
 
 template<class T, class S>
 class SearchableMatrix : public Searchable<T> {
-  Matrix<S> mat;
-  State<T> intialState;
-  State<T> goalState;
+  Matrix<T> mat;
+  S intialState;
+  S goalState;
  public:
-  SearchableMatrix(Matrix<S> matrix, State<T> startP, State<T> endP) {
+  SearchableMatrix(Matrix<T> matrix, State<S> startP, State<S> endP) {
     this->mat = matrix;
-    this->intialState = State<T>(startP.getState(), mat.costOf(startP), NULL);
-    this->goalState = State<T>(endP.getState(), mat.costOf(endP), NULL);
-
+    this->intialState = State<S>(startP.getState(), mat.costOf(startP), NULL);
+    this->goalState = State<S>(endP.getState(), mat.costOf(endP), NULL);
   }
+
   State<T> getInitState() { return this->intialState; }
   bool isGoalState(State<T> is) { return (this->goalState == is); }
   std::vector<State<T>> getAllPosiblleStates(State<T> now) {

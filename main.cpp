@@ -12,15 +12,15 @@ int main(int argc, char *argv[]) {
   State<Point> start(Point(0, 0), 0, NULL);
   State<Point> end(Point(4, 4), 0, NULL);
 
-  std::vector<State<double>> test;
+  std::vector<double> test;
   for (int i = 0; i < 25; i++) {
-    test.push_back(State<double>(i, i, NULL));
+    test.push_back(i);
   }
 
-  Matrix<State<double>> mat(5, 5, test);
+  Matrix<double> mat(5, 5, test);
   std::cout << to_string(mat) << std::endl;
 
-  SearchableMatrix<double, State<double >> sm(mat, start, end);
+  SearchableMatrix<double, Point> sm(mat, start, end);
   //BFS::search(sm);
 
   return 0;
