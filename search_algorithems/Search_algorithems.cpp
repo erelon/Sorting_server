@@ -2,10 +2,6 @@
 // Created by erelon on 1/20/20.
 //
 
-#include <queue>
-#include <unordered_set>
-#include <list>
-#include <execinfo.h>
 #include "Search_algorithems.h"
 
 template<class T, class Solution>
@@ -14,6 +10,11 @@ State<T> General_Search_Algo<T, Solution>::pop_Open_List() {
   auto temp = open_List->top();
   open_List->pop();
   return temp;
+}
+template<class T, class Solution>
+General_Search_Algo<T, Solution>::General_Search_Algo() {
+  this->open_List = new std::priority_queue<State<T>>();
+  this->evaluated_Nodes = 0;
 }
 
 template<class T, class Solution>

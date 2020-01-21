@@ -39,6 +39,7 @@ bool Searchable_Matrix<T, S>::in_Metrix_Bounds(Point p) {
 }
 template<class T, class S>
 State<T> Searchable_Matrix<T, S>::get_Init_State() { return State<T>(this->start_Point, 0, NULL); }
+
 template<class T, class S>
 bool Searchable_Matrix<T, S>::is_Goal_State(State<T> is) { return (this->end_Point == is.get_State()); }
 

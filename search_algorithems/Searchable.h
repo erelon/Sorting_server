@@ -4,7 +4,7 @@
 
 #ifndef SORTING_SERVER_SEARCH_ALGORITHEMS_SEARCHABLE_H_
 #define SORTING_SERVER_SEARCH_ALGORITHEMS_SEARCHABLE_H_
-#include <vector>
+
 #include "State.h"
 #include "../Matrix.h"
 
