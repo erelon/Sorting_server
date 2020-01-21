@@ -25,12 +25,7 @@ class Point {
       return true;
     else return false;
   }
-  friend std::string to_string(Point const &self) {
-    std::string out = "";
-    out += std::to_string(self.x);
-    out += std::to_string(self.y);
-    return out;
-  }
+  friend std::string to_string(Point const &self) { return std::to_string(self.x) + " " + std::to_string(self.y); }
 };
 
 //T must have a cost with get_Cost() func
@@ -47,10 +42,8 @@ class Matrix {
   int getnumOfRows() { return numOfRows; }
   int getnumOfCols() { return numOfColms; }
   double costOf(Point p) { return this->Mat[p.getX()][p.getY()]; }
+  friend std::string to_string(Matrix &self) { return self.to_String(); }
   std::string to_String();
-  friend std::string to_string(Matrix &self) {
-    return self.to_String();
-  }
 };
 
 template<class T>
@@ -62,7 +55,6 @@ Matrix<T>::Matrix(int rows, int colms, std::vector<T> data) {
   for (int i = 0; i < numOfRows; i++) {
     Mat[i] = new T[numOfColms];
   }
-
   auto iterData = data.begin();
   for (int i = 0; i < numOfRows; i++)
     for (int j = 0; j < numOfColms; j++) {

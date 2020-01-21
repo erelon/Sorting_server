@@ -22,9 +22,10 @@ class Searchable_Matrix : public Searchable<T> {
   Point end_Point;
  public:
   Searchable_Matrix(Matrix<S> matrix, Point startP, Point endP);
-  State<T> get_Init_State() { return State<T>(this->start_Point, 0, NULL); }
-  bool is_Goal_State(State<T> is) { return (this->end_Point == is.get_State()); }
+  State<T> get_Init_State();
+  bool is_Goal_State(State<T> is);
   std::vector<State<T>> get_All_Possible_States(State<T> now);
+  bool in_Metrix_Bounds (Point p);
 };
 
 #endif //SORTING_SERVER_SEARCH_ALGORITHEMS_SEARCHABLE_H_
