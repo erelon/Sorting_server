@@ -49,7 +49,7 @@ class SearchableMatrix : public Searchable<T> {
   S intialState;
   S goalState;
  public:
-  SearchableMatrix(Matrix<T> matrix, State<S> startP, State<S> endP) {
+  SearchableMatrix(Matrix<T> matrix, S startP, S endP) {
     this->mat = matrix;
     this->intialState = State<S>(startP.getState(), mat.costOf(startP), NULL);
     this->goalState = State<S>(endP.getState(), mat.costOf(endP), NULL);
