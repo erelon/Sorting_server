@@ -26,6 +26,5 @@ int main(int argc, char *argv[]) {
 
   BFS< std::string> work;
   work.search(sm);
-  int x = 0;
   return 0;
 }
