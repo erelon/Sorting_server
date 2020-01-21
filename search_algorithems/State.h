@@ -5,15 +5,18 @@
 #ifndef SORTING_SERVER_SEARCH_ALGORITHEMS_STATE_H_
 #define SORTING_SERVER_SEARCH_ALGORITHEMS_STATE_H_
 #include <string>
-
+//////
+#include "../Matrix.h"
+//////
 template<class T>
 class State {
  private:
   T state;
   double cost;
-  State<T> *came_From;
+  State<T> *came_From = nullptr;
  public:
-  double get_Cost() { return cost; }
+  State<T> *came_from() { return came_From; }
+  double const get_Cost() const { return cost; }
   State<T>() { this->came_From = NULL; }
   State(T state, double cost, State<T> *came_From) {
     this->state = state;
@@ -22,13 +25,14 @@ class State {
     //add the new State
   }
   bool operator==(const State<T> &s) const { return to_string(state) == to_string(s.state); }
+  bool operator<(const State<T> &s) const { return cost < s.get_Cost(); }
   T get_State() { return this->state; }
   friend std::string to_string(State<T> &t) { return std::to_string(t.get_Cost()); }
 };
 
-template<class T>
-struct std::hash<State<T>> {
-  size_t operator()(const State<T> &obj) const {
+template<>
+struct std::hash<State<Point>> {
+  size_t operator()(const State<Point> &obj) const {
     return hash<int>()(obj.get_Cost());
   }
 };

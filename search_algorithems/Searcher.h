@@ -5,11 +5,12 @@
 #ifndef SORTING_SERVER_SEARCH_ALGORITHEMS_SEARCHER_H_
 #define SORTING_SERVER_SEARCH_ALGORITHEMS_SEARCHER_H_
 #include "Searchable.h"
+#include "../Matrix.h"
 
-template<class T, class Solution>
+template<class Solution>
 class Searcher {
  public:
-  Solution virtual search(Searchable<T>) = 0;
+  Solution virtual search(Searchable<Point> &searchable) = 0;
   int virtual get_Number_Of_Nodes_Evaluated() = 0;
 };
 
