@@ -3,14 +3,14 @@
 //
 #include "server_side.h"
 #include "Matrix.h"
-#include "serach_algorithems.h"
+#include "search_algorithems/serach_algorithems.h"
 
 int main(int argc, char *argv[]) {
   //boot::Main main1;
   //main1.main(argc, argv);
 
-  State<Point> start(Point(0, 0), 0, NULL);
-  State<Point> end(Point(4, 4), 0, NULL);
+  Point start(0, 0);
+  Point end(4, 4);
 
   std::vector<double> test;
   for (int i = 0; i < 25; i++) {
@@ -20,8 +20,9 @@ int main(int argc, char *argv[]) {
   Matrix<double> mat(5, 5, test);
   std::cout << to_string(mat) << std::endl;
 
-  SearchableMatrix<double, Point> sm(mat, start, end);
-  //BFS::search(sm);
-
+  SearchableMatrix<Point, double> sm(mat, start, end);
+  //BFS::BFS<Point,std::string> work;
+  //work.search(sm);
+  int x = 0;
   return 0;
 }

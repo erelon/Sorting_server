@@ -20,7 +20,7 @@ class Point {
   }
   int getX() { return x; }
   int getY() { return y; }
-  bool operator==(Point &obj) {
+  bool operator==(Point obj) {
     if (this->x == obj.x && this->y == obj.y)
       return true;
     else return false;
@@ -46,7 +46,7 @@ class Matrix {
   ~Matrix<T>();
   int getnumOfRows() { return numOfRows; }
   int getnumOfCols() { return numOfColms; }
-  double costOf(T t) { return t.getCost(); }
+  double costOf(Point p) { return this->Mat[p.getX()][p.getY()]; }
   std::string to_String();
   friend std::string to_string(Matrix &self) {
     return self.to_String();
@@ -84,14 +84,14 @@ std::string Matrix<T>::to_String() {
   std::string out = "";
   for (int i = 0; i < numOfRows; i++) {
     for (int j = 0; j < numOfColms; j++) {
-      out += to_string(Mat[i][j]) + " ";
+      out += std::to_string(Mat[i][j]) + " ";
     }
     out += "\n";
   }
   return out;
 }
 
-template <class T>
+template<class T>
 std::string to_string(T &t) { return std::to_string(t.getCost()); }
 
 #endif //SORTING_SERVER__MATRIX_H_
