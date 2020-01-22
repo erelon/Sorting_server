@@ -3,6 +3,7 @@
 //
 
 #include "Solve_problems.h"
+#include "Adapter_Solver_Searcher.h"
 
 std::string ReversSolver::solve(std::string str) {
   std::string ret_str;
@@ -12,3 +13,14 @@ std::string ReversSolver::solve(std::string str) {
   return ret_str;
 }
 ReversSolver::ReversSolver() {}
+MatrixSolver::MatrixSolver(Point s, Point e) {
+  this->start = s;
+  this->end = e;
+}
+
+std::string MatrixSolver::solve(Matrix<double> mat) {
+  std::string ret_str;
+  ret_str = adapt<double,std::string>(mat, this->start, this->end);
+  return ret_str;
+}
+

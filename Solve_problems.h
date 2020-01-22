@@ -7,6 +7,7 @@
 #include <bits/stdc++.h>
 #include <string>
 #include <cstdio>
+#include "Matrix.h"
 
 template<class Problem, class Solution>
 class Solver {
@@ -21,6 +22,16 @@ class ReversSolver : public Solver<std::string, std::string> {
  public:
   ReversSolver();
   std::string solve(std::string str);
+};
+
+class MatrixSolver : public Solver<Matrix<double> , std::string>{
+  Matrix<double> matrix_to_solve;
+  Point start;
+  Point end;
+ public:
+  MatrixSolver();
+  MatrixSolver(Point s, Point e);
+  std::string solve(Matrix<double> mat);
 };
 
 #endif //SORTING_SERVER__SOLVE_PROBLEMS_H_
