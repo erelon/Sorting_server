@@ -24,9 +24,9 @@ int main(int argc, char *argv[]) {
 
   Searchable_Matrix<double, Point> sm(&mat, start, end);
 
-  //BFS< std::string> work;
-  //work.search(sm);
-  A_Star<std::string> work;
+  BFS< std::string> work;
   work.search(sm);
+  //A_Star<std::string> work;
+  //work.search(sm);
   return 0;
 }

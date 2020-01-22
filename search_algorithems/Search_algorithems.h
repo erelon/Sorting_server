@@ -20,10 +20,10 @@ class General_Search_Algo : public Searcher<Solution> {
   std::priority_queue<State<Point>> *open_List;
   State<Point> pop_Open_List() {
     evaluated_Nodes++;
-    State<Point> *temp = new State<Point>();
-    (*temp).operator=(open_List->top());
+    State<Point> temp;
+    temp.operator=(open_List->top());
     open_List->pop();
-    return *temp;
+    return temp;
   }
 
  public:
@@ -51,7 +51,7 @@ class BFS : public General_Search_Algo<Solution> {
  public:
   Solution search(Searchable<Point> &searchable) {
     std::unordered_set<State<Point>> done;
-    this->open_List->push(searchable.get_Init_State());
+    this->open_List->push(*searchable.get_Init_State());
     while (!this->open_List->empty()) {
       auto u = this->pop_Open_List();
       if (done.find(u) != done.end()) {

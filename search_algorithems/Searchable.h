@@ -11,7 +11,7 @@
 template<class S>
 class Searchable {
  public:
-  State<S> virtual get_Init_State() = 0;
+  State<S> virtual *get_Init_State() = 0;
   bool virtual is_Goal_State(State<S> is) = 0;
   State<S> virtual get_Goal_State() = 0;
   //array of states

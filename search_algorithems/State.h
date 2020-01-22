@@ -15,22 +15,27 @@ class State {
   double cost;
   State<T> *came_From;
  public:
-   State<Point> *came_from() const { return came_From; }
+  State<Point> *came_from() const { return came_From; }
   double const get_Cost() const { return cost; }
   State<T>() { this->came_From = nullptr; }
-  ~State<T>() {}
+  State<T>(State<T> const &copy) {
+    this->state = copy.get_State();
+    this->cost = copy.get_Cost();
+    this->came_From = copy.came_from();
+  }
   State(T state, double cost, State<T> *came_From) {
     this->state = state;
     this->cost = cost;
     this->came_From = came_From;
     //add the new State
   }
+  ~State<T>() {}
   bool operator==(const State<T> &s) const { return to_string(state) == to_string(s.state); }
   bool operator<(const State<T> &s) const { return cost < s.get_Cost(); }
-  State<T>& operator=(const State<T> &s) {
+  State<T> &operator=(const State<T> &s) {
     state = s.get_State();
     cost = s.get_Cost();
-    came_From =  s.came_From;
+    came_From = s.came_From;
     return *this;
   }
   T get_State() const { return this->state; }
