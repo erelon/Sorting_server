@@ -20,10 +20,10 @@ class General_Search_Algo : public Searcher<Solution> {
   std::priority_queue<State<Point>> *open_List;
   State<Point> pop_Open_List() {
     evaluated_Nodes++;
-    State<Point> temp;
-    temp.operator=(open_List->top());
+    State<Point> *temp = new State<Point>();
+    (*temp).operator=(open_List->top());
     open_List->pop();
-    return temp;
+    return *temp;
   }
  public:
   General_Search_Algo<Solution>() {
@@ -41,7 +41,7 @@ class BFS : public General_Search_Algo<Solution> {
   Solution backtrace(State<Point> &u) {
     Solution s;
     State<Point> const *step;
-    s += to_string(u.get_State()) + ", ";
+    s += to_string(u.get_State()) + ", ";https://github.com/erelon/Sorting_server.git
     while (u.came_from() != nullptr) {
       step = u.came_from();
       s += to_string(step->get_State()) + ", ";
