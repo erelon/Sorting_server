@@ -23,10 +23,10 @@ class State {
     this->cost = copy.get_Cost();
     this->came_From = copy.came_from();
   }
-  State(T state, double cost, State<T> *came_From) {
+  State(T state, double cost, State<T> *came_From1) {
     this->state = state;
     this->cost = cost;
-    this->came_From = came_From;
+    this->came_From = came_From1;
     //add the new State
   }
   ~State<T>() {}

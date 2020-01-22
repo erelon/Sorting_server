@@ -62,12 +62,12 @@ class BFS : public General_Search_Algo<Solution> {
         return this->backtrace(u);
       else {
         std::unordered_set<State<Point>> visited;
-        State<Point> *all_Possible_States = searchable.get_All_Possible_States(u);
+        State<Point> **all_Possible_States = searchable.get_All_Possible_States(u);
         for (int i = 0; i < 4; i++) {
-          if ((all_Possible_States + i)->came_from() != nullptr) {
-            if (visited.find(all_Possible_States[i]) == visited.end()) {//check if v was not visited yet
-              visited.insert(all_Possible_States[i]);
-              this->open_List->push(all_Possible_States[i]);
+          if (*(all_Possible_States + i) != nullptr) {
+            if (visited.find(*all_Possible_States[i]) == visited.end()) {//check if v was not visited yet
+              visited.insert(*all_Possible_States[i]);
+              this->open_List->push(*all_Possible_States[i]);
             }
           }
         }
@@ -144,7 +144,7 @@ class A_Star : public General_Search_Algo<Solution> {
       }
       close_List.push_back(q);
     }
-    int y=9;
+    int y = 9;
   }
 };
 
