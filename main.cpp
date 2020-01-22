@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
   Matrix<double> mat(5, 5, test);
   std::cout << to_string(mat) << std::endl;
 
-  Searchable_Matrix<double, Point> sm(mat, start, end);
+  Searchable_Matrix<double, Point> sm(&mat, start, end);
 
   BFS< std::string> work;
   work.search(sm);

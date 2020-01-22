@@ -18,8 +18,12 @@ class Point {
     this->x = x;
     this->y = y;
   }
-  int getX() { return x; }
-  int getY() { return y; }
+  int getX() const { return x; }
+  int getY() const { return y; }
+  Point operator=(const Point &p) {
+    this->x = p.getX();
+    this->y = p.getY();
+  }
   bool operator==(Point obj) {
     if (this->x == obj.x && this->y == obj.y)
       return true;
@@ -37,7 +41,7 @@ class Matrix {
   int numOfRows;
  public:
   Matrix<T>(int rows, int colms, std::vector<T> data);
-  Matrix<T>() { this->Mat = NULL; }
+  Matrix<T>() { this->Mat = nullptr; }
   ~Matrix<T>();
   int getnumOfRows() { return numOfRows; }
   int getnumOfCols() { return numOfColms; }
@@ -65,7 +69,7 @@ Matrix<T>::Matrix(int rows, int colms, std::vector<T> data) {
 
 template<class T>
 Matrix<T>::~Matrix<T>() {
-  for (int i = 0; i < numOfRows; i++) {
+  for (int i = numOfRows - 1; i >= 0; i--) {
     delete Mat[i];
   }
   delete Mat;
