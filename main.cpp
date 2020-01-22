@@ -8,8 +8,13 @@
 #include "search_algorithems/Searchable_Matrix.h"
 
 int main(int argc, char *argv[]) {
-  //boot::Main main1;
-  //main1.main(argc, argv);
+  boot::Main main1;
+  main1.main(argc, argv);
+
+
+
+
+
 
   Point start(0, 0);
   Point end(4, 4);

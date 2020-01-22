@@ -130,19 +130,17 @@ void MyTestClientHandler::handleClient(std::string in, int out) {
     in = buffer;
   }
 }
-}
 
 class MyClientHandler : public ClientHandler {
  private:
   Solver<Matrix<double>, std::string> *s;
   CacheManager<std::string, std::string> *cache_manager;
  public:
-  MyClientHandler(Solver<Matrix<double>, std::string> *sol, CacheManager<std::string, std::string> *manger);
+  MyClientHandler(MatrixSolver *sol, CacheManager<std::string, std::string> *manger);
   void handleClient(std::string in, int out);
 };
 
-MyClientHandler::MyClientHandler(Solver<Matrix<double>, std::string> *sol,
-                                 CacheManager<std::string, std::string> *manger) {
+MyClientHandler::MyClientHandler(MatrixSolver *sol, CacheManager<std::string, std::string> *manger) {
   this->cache_manager = manger;
   this->s = sol;
 }
@@ -151,16 +149,16 @@ void MyClientHandler::handleClient(std::string in, int out) {
   int count_colms = 0, count_rows = 0;
   std::string answer;
 
-  while (in.compare("end")) {
+  while (in.find("end") != std::string::npos) {
 
     count_rows++;
 
     char *dup = strdup(in.c_str());
-    char *token = strtok(dup, ",");
-    while (token != "\n") {
+    char *token = strtok(dup, ", \r\n");
+    while (token != NULL) {
       count_colms++;
       input.push_back(atoi(token));
-      token = strtok(NULL, ",");
+      token = strtok(NULL, " ,\r\n");
     }
     free(dup);
     char buffer[2048] = {0};
@@ -178,12 +176,18 @@ void MyClientHandler::handleClient(std::string in, int out) {
   this->cache_manager->save(to_string(mat), answer);
   write(out, answer.c_str(), answer.length());
 }
+}
 int boot::Main::main(int argc, char *argv[]) {
   FileCacheManager cache_manager(5);
-  ReversSolver solver;
-  server_side::MyTestClientHandler client_handler(&solver, &cache_manager);
+  MatrixSolver *solver = new MatrixSolver();
 
+  //ReversSolver solver;
+  //server_side::MyTestClientHandler client_handler(&solver, &cache_manager);
+
+  server_side::MyClientHandler client_handler(solver, &cache_manager);
   server_side::MySerialServer server(&client_handler);
+
   server.open(5600, &client_handler);
   while (true);
+  delete solver;
 }

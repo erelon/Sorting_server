@@ -29,7 +29,7 @@ class MatrixSolver : public Solver<Matrix<double> , std::string>{
   Point start;
   Point end;
  public:
-  MatrixSolver();
+  MatrixSolver(){}
   MatrixSolver(Point s, Point e);
   std::string solve(Matrix<double> mat);
 };

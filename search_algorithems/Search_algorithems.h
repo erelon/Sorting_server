@@ -144,7 +144,14 @@ class A_Star : public General_Search_Algo<Solution> {
       }
       close_List.push_back(q);
     }
-    int y = 9;
+  }
+};
+
+template<class Solution>
+class DFS : public General_Search_Algo<Solution> {
+ public:
+  Solution search(Searchable<Point> &searchable) {
+
   }
 };
 
