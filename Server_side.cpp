@@ -102,13 +102,14 @@ MySerialServer::MySerialServer(ClientHandler *cl) {
 class MyTestClientHandler : public ClientHandler {
  private:
   Solver<std::string, std::string> *s;
-  CacheManager<std::string,std::string> *cache_manager;
+  CacheManager<std::string, std::string> *cache_manager;
  public:
-  MyTestClientHandler(Solver<std::string, std::string> *sol, CacheManager<std::string,std::string> *manger);
+  MyTestClientHandler(Solver<std::string, std::string> *sol, CacheManager<std::string, std::string> *manger);
   void handleClient(std::string in, int out);
 };
 
-MyTestClientHandler::MyTestClientHandler(Solver<std::string, std::string> *sol, CacheManager<std::string,std::string> *manger) {
+MyTestClientHandler::MyTestClientHandler(Solver<std::string, std::string> *sol,
+                                         CacheManager<std::string, std::string> *manger) {
   this->cache_manager = manger;
   this->s = sol;
 }
@@ -131,6 +132,52 @@ void MyTestClientHandler::handleClient(std::string in, int out) {
 }
 }
 
+class MyClientHandler : public ClientHandler {
+ private:
+  Solver<Matrix<double>, std::string> *s;
+  CacheManager<std::string, std::string> *cache_manager;
+ public:
+  MyClientHandler(Solver<Matrix<double>, std::string> *sol, CacheManager<std::string, std::string> *manger);
+  void handleClient(std::string in, int out);
+};
+
+MyClientHandler::MyClientHandler(Solver<Matrix<double>, std::string> *sol,
+                                 CacheManager<std::string, std::string> *manger) {
+  this->cache_manager = manger;
+  this->s = sol;
+}
+void MyClientHandler::handleClient(std::string in, int out) {
+  std::vector<double> input;
+  int count_colms = 0, count_rows = 0;
+  std::string answer;
+
+  while (in.compare("end")) {
+
+    count_rows++;
+
+    char *dup = strdup(in.c_str());
+    char *token = strtok(dup, ",");
+    while (token != "\n") {
+      count_colms++;
+      input.push_back(atoi(token));
+      token = strtok(NULL, ",");
+    }
+    free(dup);
+    char buffer[2048] = {0};
+    read(out, buffer, 1024);
+    in = buffer;
+  }
+  Matrix<double> mat(count_rows, count_colms, input);
+
+  if (this->cache_manager->is_in_cache(to_string(mat))) {
+    answer = cache_manager->load(to_string(mat));
+    write(out, answer.c_str(), answer.length());
+  }
+
+  answer = s->solve(mat);
+  this->cache_manager->save(to_string(mat), answer);
+  write(out, answer.c_str(), answer.length());
+}
 int boot::Main::main(int argc, char *argv[]) {
   FileCacheManager cache_manager(5);
   ReversSolver solver;
