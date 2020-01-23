@@ -32,12 +32,12 @@ class State {
   ~State<T>() {}
   bool operator==(const State<T> &s) const { return to_string(state) == to_string(s.state); }
   bool operator<(const State<T> &s) const { return cost < s.get_Cost(); }
-  State<T> &operator=(const State<T> &s) {
+  /*State<T> &operator=(const State<T> &s) {
     state = s.get_State();
     cost = s.get_Cost();
-    came_From = s.came_From;
+    came_From = s.came_from();
     return *this;
-  }
+  }*/
   T get_State() const { return this->state; }
   T get_State() { return this->state; }
   friend std::string to_string(State<T> &t) { return std::to_string(t.get_Cost()); }

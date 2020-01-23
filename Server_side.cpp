@@ -133,7 +133,7 @@ void MyTestClientHandler::handleClient(std::string in, int out) {
 
 class MyClientHandler : public ClientHandler {
  private:
-  Solver<Matrix<double>, std::string> *s;
+  MatrixSolver *s;
   CacheManager<std::string, std::string> *cache_manager;
  public:
   MyClientHandler(MatrixSolver *sol, CacheManager<std::string, std::string> *manger);
@@ -148,32 +148,49 @@ void MyClientHandler::handleClient(std::string in, int out) {
   std::vector<double> input;
   int count_colms = 0, count_rows = 0;
   std::string answer;
-
-  while (in.find("end") != std::string::npos) {
+  bool first_raw = true;
+  while (in.find("end") == std::string::npos) {
 
     count_rows++;
 
     char *dup = strdup(in.c_str());
     char *token = strtok(dup, ", \r\n");
     while (token != NULL) {
-      count_colms++;
+      if (first_raw) { count_colms++; }
       input.push_back(atoi(token));
       token = strtok(NULL, " ,\r\n");
     }
     free(dup);
+    first_raw = false;
     char buffer[2048] = {0};
     read(out, buffer, 1024);
     in = buffer;
   }
-  Matrix<double> mat(count_rows, count_colms, input);
+  count_rows -= 2;
+  auto y = input.back();
+  input.pop_back();
+  auto x = input.back();
 
-  if (this->cache_manager->is_in_cache(to_string(mat))) {
-    answer = cache_manager->load(to_string(mat));
+  input.pop_back();
+  Point end(x, y);
+
+  y = input.back();
+  input.pop_back();
+  x = input.back();
+  input.pop_back();
+  Point start(x, y);
+
+  s->set_start_end(start, end);
+  Matrix<double> mat(count_rows, count_colms, input);
+  std::string string_Mat = to_string(mat);
+
+  if (this->cache_manager->is_in_cache(string_Mat)) {
+    answer = cache_manager->load(string_Mat);
     write(out, answer.c_str(), answer.length());
   }
 
   answer = s->solve(mat);
-  this->cache_manager->save(to_string(mat), answer);
+  this->cache_manager->save(string_Mat, answer);
   write(out, answer.c_str(), answer.length());
 }
 }

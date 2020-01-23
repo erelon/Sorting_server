@@ -31,6 +31,7 @@ class MatrixSolver : public Solver<Matrix<double> , std::string>{
  public:
   MatrixSolver(){}
   MatrixSolver(Point s, Point e);
+  void set_start_end(Point s, Point e);
   std::string solve(Matrix<double> mat);
 };
 

@@ -14,7 +14,7 @@ template<class T, class Solution>
 Solution adapt(Matrix<T> sr, Point start, Point end) {
 
   Searchable_Matrix<double, Point> sm(&sr, start, end);
-  BFS<Solution> work;
+  A_Star<Solution> work;
 
   return work.search(sm);
 }
