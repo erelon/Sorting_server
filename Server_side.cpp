@@ -239,6 +239,8 @@ void MyClientHandler::handleClient(std::string in, int out) {
       big_token = strtok_r(NULL, "\r\n", save_big);
     }
     count_rows -= 2;
+    delete save_big;
+    delete save;
   } else {
     //this is a short string send again and again till end
     while (in.find("end") == std::string::npos) {

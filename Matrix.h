@@ -6,6 +6,7 @@
 #define SORTING_SERVER__MATRIX_H_
 #include <vector>
 #include <string>
+#include <mutex>
 
 class Point {
   int x, y;
@@ -23,6 +24,7 @@ class Point {
   Point operator=(const Point &p) {
     this->x = p.getX();
     this->y = p.getY();
+    return *this;
   }
   bool operator<(const Point &p2) {
     if (this->getX() > p2.getX()) {
@@ -30,7 +32,7 @@ class Point {
     }
     return this->getY() > p2.getY();
   }
-  bool const operator==(const Point &obj) {
+  bool operator==(const Point &obj) {
     if (this->x == obj.x && this->y == obj.y)
       return true;
     else return false;
@@ -53,11 +55,15 @@ template<class T>
 class Matrix {
  private:
   T **Mat;
-  int numOfColms;
-  int numOfRows;
+  int numOfColms{};
+  int numOfRows{};
  public:
   Matrix<T>(int rows, int colms, std::vector<T> data);
-  Matrix<T>() { this->Mat = nullptr; }
+  Matrix<T>() {
+    this->Mat = nullptr;
+    numOfColms = 0;
+    numOfRows = 0;
+  }
   ~Matrix<T>();
   int getnumOfRows() { return numOfRows; }
   int getnumOfCols() { return numOfColms; }
@@ -88,18 +94,21 @@ Matrix<T>::~Matrix<T>() {
   for (int i = numOfRows - 1; i >= 0; i--) {
     //delete Mat[i];
   }
-  delete Mat;
+  //delete Mat;
 }
 
 template<class T>
 std::string Matrix<T>::to_String() {
-  std::string out = "";
+  std::string out;
+  std::mutex mutex;
+  while (!mutex.try_lock());
   for (int i = 0; i < numOfRows; i++) {
     for (int j = 0; j < numOfColms; j++) {
       out += std::to_string(Mat[i][j]) + " ";
     }
     out += "\n";
   }
+  mutex.unlock();
   return out;
 }
 

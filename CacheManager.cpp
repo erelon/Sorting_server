@@ -21,7 +21,10 @@ void FileCacheManager::save(std::string q, std::string a) {
   std::string key;
   //craete a smart key for the object
   std::hash<std::string> hasher;
+  std::mutex mutex;
+  while(!mutex.try_lock());
   this->insert(std::to_string(hasher(q)), a);
+  mutex.unlock();
 }
 
 void FileCacheManager::insert(std::string key, std::string obj) {
@@ -61,13 +64,12 @@ bool FileCacheManager::is_in_cache(std::string to_search) {
 
   std::fstream stream;
   std::string npath(cache_path + std::to_string(cache_num) + std::to_string(hasher(to_search)));
+  std::mutex mutex;
+  while(!mutex.try_lock());
   //checking if the key was created once:
   FILE *check = fopen(npath.c_str(), "rb");
-  if (check == nullptr) {
-    //fclose(check);
-    return false;
-  }
-  return true;
+  mutex.unlock();
+  return check != nullptr;
 }
 
 std::string FileCacheManager::load(std::string key) {

@@ -24,7 +24,7 @@ class Searchable_Matrix : public Searchable<S> {
   State<S> get_Goal_State() { return State<S>(this->end_Point, 0, nullptr); }
   bool is_Goal_State(State<S> is) { return (this->end_Point == is.get_State()); }
   State<S> **get_All_Possible_States(State<S> &current_State) {
-    State<S> **ret = new State<S> *[4];
+    auto **ret = new State<S> *[4];
 
     std::list<Point> offsets;
     offsets.emplace_back(0, 1); // Down

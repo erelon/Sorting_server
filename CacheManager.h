@@ -9,9 +9,9 @@
 template<class Problem, class Solution>
 class CacheManager {
  public:
-  bool virtual is_in_cache(Problem) = 0;
-  Solution virtual load(Problem) = 0;
-  void virtual save(Problem, Solution) = 0;
+  virtual bool is_in_cache(Problem) = 0;
+  virtual Solution load(Problem) = 0;
+  virtual void save(Problem, Solution) = 0;
 };
 
 class FileCacheManager : public CacheManager<std::string, std::string> {

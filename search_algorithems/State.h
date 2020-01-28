@@ -17,7 +17,10 @@ class State {
  public:
   State<Point> *came_from() const { return came_From; }
   double const get_Cost() const { return cost; }
-  State<T>() { this->came_From = nullptr; }
+  State<T>() {
+    this->came_From = nullptr;
+    cost = 0;
+  }
   State<T>(State<T> const &copy) {
     this->state = copy.get_State();
     this->cost = copy.get_Cost();
