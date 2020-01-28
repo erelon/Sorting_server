@@ -5,18 +5,17 @@
 #ifndef SORTING_SERVER_SEARCH_ALGORITHEMS_STATE_H_
 #define SORTING_SERVER_SEARCH_ALGORITHEMS_STATE_H_
 #include <string>
-//////
 #include "../Matrix.h"
-//////
+
 template<class T>
 class State {
  private:
   T state;
-  double cost;
+  int cost;
   State<T> *came_From;
  public:
   State<Point> *came_from() const { return came_From; }
-  double const get_Cost() const { return cost; }
+  int const get_Cost() const { return cost; }
   State<T>() {
     this->came_From = nullptr;
     cost = 0;
@@ -26,7 +25,7 @@ class State {
     this->cost = copy.get_Cost();
     this->came_From = copy.came_from();
   }
-  State(T state, double cost, State<T> *came_From1) {
+  State(T state, int cost, State<T> *came_From1) {
     this->state = state;
     this->cost = cost;
     this->came_From = came_From1;

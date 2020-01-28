@@ -53,8 +53,6 @@ int accept_client(int socketfd, sockaddr_in address) {
                              &clientAddrLen);
 
   if (client_socket == -1) {
-    //std::cerr << strerror(errno) << std::endl;
-    //timeout
     return -1;
   }
 }
@@ -209,12 +207,11 @@ MyClientHandler::MyClientHandler(MatrixSolver *sol, CacheManager<std::string, st
   this->s = sol;
 }
 void MyClientHandler::handleClient(std::string in, int out) {
-  std::vector<double> input;
+  std::vector<int> input;
   int count_colms = 0, count_rows = 0;
   std::string answer;
   bool first_raw = true;
 
-  //if (in.find("end") != std::string::npos) {
   //this is a long string with end in the end
   char *dup = strdup(in.c_str());
   char **save_big = new char *;
@@ -226,6 +223,11 @@ void MyClientHandler::handleClient(std::string in, int out) {
       break;
     if (big_token == NULL) {
       char buffer[2048] = {0};
+      //we want the data to come in the most idle way
+      struct timespec timespec;
+      timespec.tv_sec = 0;
+      timespec.tv_nsec = 250000000;
+      nanosleep(&timespec, NULL);
       read(out, buffer, 2048);
       in = buffer;
       if (strcmp(in.c_str(), "") == 0)
@@ -244,31 +246,9 @@ void MyClientHandler::handleClient(std::string in, int out) {
     first_raw = false;
     big_token = strtok_r(NULL, "\r\n", save_big);
   }
-  //count_rows -= 2;
   delete save_big;
   delete save;
-  //}
-  /*else {
-   //this is a short string send again and again till end
-   while (in.find("end") == std::string::npos) {
-     count_rows++;
-     char *dup = strdup(in.c_str());
-     char **save = new char *;
-     char *token = strtok_r(dup, ", \r\n", save);
-     while (token != NULL) {
-       if (first_raw) { count_colms++; }
 
-       input.push_back(atoi(token));
-       token = strtok_r(NULL, " ,\r\n", save);
-     }
-     free(dup);
-     first_raw = false;
-     char buffer[2048] = {0};
-     read(out, buffer, 2048);
-     in = buffer;
-   }
- }//end of else*/
-  //count_rows -= 2;
   auto y = input.back();
   input.pop_back();
   auto x = input.back();
@@ -285,27 +265,20 @@ void MyClientHandler::handleClient(std::string in, int out) {
   count_rows = input.size() / count_colms;
 
   s->set_start_end(start, end);
-  Matrix<double> mat(count_rows, count_colms, input);
+  Matrix<int> mat(count_rows, count_colms, input);
   std::string string_Mat = to_string(mat);
   string_Mat += to_string(start) + to_string(end);
 
   std::mutex mute;
-  //while (!mute.try_lock());
   if (this->cache_manager->is_in_cache(string_Mat)) {
     answer = cache_manager->load(string_Mat);
     mute.unlock();
     write(out, answer.c_str(), answer.length());
     return;
   }
-  //mute.unlock();
 
   answer = s->solve(mat);
-  //bool check = mute.try_lock();
-  //while (check == false) {
-  // check = mute.try_lock();
-  //}
   this->cache_manager->save(string_Mat, answer);
-  //mute.unlock();
   write(out, answer.c_str(), answer.length());
 }
 }
@@ -320,9 +293,9 @@ int boot::Main::main(int argc, char *argv[]) {
   //server_side::MyTestClientHandler client_handler(&solver, &cache_manager);
 
   server_side::MyClientHandler client_handler(solver, &cache_manager);
-  server_side::MySerialServer server(&client_handler);
+  //server_side::MySerialServer server(&client_handler);
 
-//  server_side::MyParalelServer server(&client_handler);
+  server_side::MyParalelServer server(&client_handler);
 
   server.open(5600, &client_handler);
   while (server.is_running()) {

@@ -43,6 +43,10 @@ class General_Search_Algo : public Searcher<Solution> {
       path.push_back(*step);
       step = step->came_from();
     }
+
+    if (path.back().get_Cost() == -1)
+      return "no path found";
+
     std::string s;
     path.reverse();
     Point last;
@@ -50,13 +54,13 @@ class General_Search_Algo : public Searcher<Solution> {
     for (auto iter = path.begin(); iter != path.end(); iter++) {
       if (!first_time) {
         if (iter->get_State().getX() > last.getX())
-          s = s + "RIGHT: ";
-        if (iter->get_State().getX() < last.getX())
-          s = s + "Left: ";
-        if (iter->get_State().getY() > last.getY())
           s = s + "DOWN: ";
-        if (iter->get_State().getY() < last.getY())
+        if (iter->get_State().getX() < last.getX())
           s = s + "UP: ";
+        if (iter->get_State().getY() > last.getY())
+          s = s + "RIGHT: ";
+        if (iter->get_State().getY() < last.getY())
+          s = s + "Left: ";
         s = s + std::to_string(iter->get_Cost()) + ", ";
       }
       last = iter->get_State();
@@ -135,7 +139,8 @@ class A_Star : public General_Search_Algo<Solution> {
  public:
   Solution search(Searchable<Point> &searchable) {
     auto
-        open_List_alloc = new std::priority_queue<A_Star_Node<Point>, std::vector<A_Star_Node<Point>>, A_Star_Node_Compare>();
+        open_List_alloc =
+        new std::priority_queue<A_Star_Node<Point>, std::vector<A_Star_Node<Point>>, A_Star_Node_Compare>();
     std::list<A_Star_Node<Point>> all_Nodes;
     std::list<A_Star_Node<Point>> close_List;
     auto iter = new A_Star_Node<Point>(searchable.get_Init_State(), 0);

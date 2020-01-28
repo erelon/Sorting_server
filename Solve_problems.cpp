@@ -18,9 +18,9 @@ MatrixSolver::MatrixSolver(Point s, Point e) {
   this->end = e;
 }
 
-std::string MatrixSolver::solve(Matrix<double> mat) {
+std::string MatrixSolver::solve(Matrix<int> mat) {
   std::string ret_str;
-  ret_str = adapt<double, std::string>(mat, this->start, this->end);
+  ret_str = adapt<int, std::string>(mat, this->start, this->end);
   return ret_str;
 }
 void MatrixSolver::set_start_end(Point s, Point e) {

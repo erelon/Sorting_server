@@ -67,7 +67,7 @@ class Matrix {
   ~Matrix<T>();
   int getnumOfRows() { return numOfRows; }
   int getnumOfCols() { return numOfColms; }
-  double costOf(Point p) { return this->Mat[p.getX()][p.getY()]; }
+  int costOf(Point p) { return this->Mat[p.getX()][p.getY()]; }
   friend std::string to_string(Matrix &self) { return self.to_String(); }
   std::string to_String();
 };
@@ -84,7 +84,7 @@ Matrix<T>::Matrix(int rows, int colms, std::vector<T> data) {
   auto iterData = data.begin();
   for (int i = 0; i < numOfRows; i++)
     for (int j = 0; j < numOfColms; j++) {
-      Mat[j][i] = *iterData;
+      Mat[i][j] = *iterData;
       iterData++;
     }
 }
