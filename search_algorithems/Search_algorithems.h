@@ -129,8 +129,8 @@ class A_Star_Node {
 
 class A_Star_Node_Compare {
  public:
-  int operator()(A_Star_Node<Point> p1, A_Star_Node<Point> p2) {
-    return !(p1.getH() < p2.getH());
+  int operator()(A_Star_Node<Point> *p1, A_Star_Node<Point> *p2) {
+    return !(p1->getF() < p2->getF());
   }
 };
 
@@ -140,48 +140,57 @@ class A_Star : public General_Search_Algo<Solution> {
   Solution search(Searchable<Point> &searchable) {
     auto
         open_List_alloc =
-        new std::priority_queue<A_Star_Node<Point>, std::vector<A_Star_Node<Point>>, A_Star_Node_Compare>();
-    std::list<A_Star_Node<Point>> all_Nodes;
-    std::list<A_Star_Node<Point>> close_List;
+        new std::priority_queue<A_Star_Node<Point> *, std::vector<A_Star_Node<Point> *>, A_Star_Node_Compare>();
+    std::list<A_Star_Node<Point> *> all_Nodes;
+    std::list<A_Star_Node<Point> *> close_List;
     auto iter = new A_Star_Node<Point>(searchable.get_Init_State(), 0);
-    open_List_alloc->push(*iter);
-    all_Nodes.push_back(*iter);
+    open_List_alloc->push(iter);
+    all_Nodes.push_back(iter);
     this->open_List->push(*iter->get_State());
     while (!open_List_alloc->empty()) {
       this->pop_Open_List();
-      A_Star_Node<Point> q = open_List_alloc->top();
+      A_Star_Node<Point> *q = open_List_alloc->top();
       open_List_alloc->pop();
       all_Nodes.remove(q);
 
-      State<Point> **suc = searchable.get_All_Possible_States(*q.get_State());
+      State<Point> **suc = searchable.get_All_Possible_States(*q->get_State());
       for (int i = 0; i < 4; i++) {
         if (*(suc + i) == nullptr)
           continue;
         if (searchable.is_Goal_State(*suc[i])) {
           return this->backtrace(*suc[i]);
         }
-        A_Star_Node<Point> suc_A
+        bool seen = false;
+        for (auto item = close_List.begin(); item != close_List.end(); item++) {
+          if ((*item)->get_State()->get_State() == suc[i]->get_State()) {
+            seen = true;
+            break;
+            //we have finished with this node
+          }
+        }
+        if(seen) continue;
+        A_Star_Node<Point> *suc_A = new A_Star_Node<Point>
             (new State<Point>(suc[i]->get_State(), suc[i]->get_Cost(), suc[i]->came_from()),
              abs(suc[i]->get_State().getX() - searchable.get_Goal_State().get_State().getX())
                  + abs(suc[i]->get_State().getY() - searchable.get_Goal_State().get_State().getY()));
         bool is_lower = true;
         for (auto item:all_Nodes) {
-          if (suc_A.get_State()->get_State() == item.get_State()->get_State()) {
-            if (item.getF() < suc_A.getF())
+          if (suc_A->get_State()->get_State() == item->get_State()->get_State()) {
+            if (item->getF() < suc_A->getF())
               is_lower = false;
           }
         }
 
         for (auto item:close_List) {
-          if (suc_A.get_State()->get_State() == item.get_State()->get_State()) {
-            if (item.getF() < suc_A.getF())
+          if (suc_A->get_State()->get_State() == item->get_State()->get_State()) {
+            if (item->getF() < suc_A->getF())
               is_lower = false;
           }
         }
         if (is_lower) {
           open_List_alloc->push(suc_A);
           all_Nodes.push_back(suc_A);
-          this->open_List->push(*suc_A.get_State());
+          this->open_List->push(*suc_A->get_State());
         }
       }
       close_List.push_back(q);
