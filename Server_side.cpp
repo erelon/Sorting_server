@@ -46,7 +46,7 @@ int accept_client(int socketfd, sockaddr_in address) {
   socklen_t clientAddrLen = sizeof(address);
 
   struct timeval tv;
-  tv.tv_sec = 10;
+  tv.tv_sec = 120;
   tv.tv_usec = 0;
   setsockopt(socketfd, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof tv);
   int client_socket = accept(socketfd, (struct sockaddr *) &address,
@@ -126,6 +126,7 @@ class MySerialServer : Server {
   int run(int socketfd);
   int open(int port, ClientHandler *c);
   int stop();
+  bool is_running();
 };
 
 int MySerialServer::open(int port, ClientHandler *c) {
@@ -139,8 +140,7 @@ int MySerialServer::run(int socketfd) {
   while (to_run) {
     int client = accept_client(socketfd, address);
     if (client == -1) {
-      //add timeout
-      sleep(2);
+      to_run = false;
       continue;
     }
 
@@ -158,6 +158,9 @@ int MySerialServer::stop() {
 }
 MySerialServer::MySerialServer(ClientHandler *cl) {
   this->client_handler = cl;
+}
+bool MySerialServer::is_running() {
+  return this->to_run;
 }
 
 class MyTestClientHandler : public ClientHandler {
@@ -211,57 +214,61 @@ void MyClientHandler::handleClient(std::string in, int out) {
   std::string answer;
   bool first_raw = true;
 
-  if (in.find("end") == std::string::npos) {
-    //this is a long string with end in the end
-    char *dup = strdup(in.c_str());
-    char **save_big = new char *;
-    char **save = new char *;
-    char *big_token = strtok_r(dup, "\r\n", save_big);
+  //if (in.find("end") != std::string::npos) {
+  //this is a long string with end in the end
+  char *dup = strdup(in.c_str());
+  char **save_big = new char *;
+  char **save = new char *;
+  char *big_token = strtok_r(dup, "\r\n", save_big);
 
-    while (big_token == NULL || strcmp(big_token, "end") != 0) {
-      if (big_token == NULL) {
-        char buffer[2048] = {0};
-        read(out, buffer, 2048);
-        in = buffer;
-        dup = strdup(in.c_str());
-        big_token = strtok_r(dup, "\r\n", save_big);
-      }
-
-      char *token = strtok_r(big_token, ",", save);
-      while (token != NULL) {
-        if (first_raw) { count_colms++; }
-
-        input.push_back(atoi(token));
-        token = strtok_r(NULL, " ,", save);
-      }
-      first_raw = false;
-      count_rows++;
-      big_token = strtok_r(NULL, "\r\n", save_big);
-    }
-    count_rows -= 2;
-    delete save_big;
-    delete save;
-  } else {
-    //this is a short string send again and again till end
-    while (in.find("end") == std::string::npos) {
-      count_rows++;
-      char *dup = strdup(in.c_str());
-      char **save = new char *;
-      char *token = strtok_r(dup, ", \r\n", save);
-      while (token != NULL) {
-        if (first_raw) { count_colms++; }
-
-        input.push_back(atoi(token));
-        token = strtok_r(NULL, " ,\r\n", save);
-      }
-      free(dup);
-      first_raw = false;
+  while (big_token == NULL || strcmp(big_token, "end") != 0) {
+    if (strcmp(in.c_str(), "end") == 0 || strcmp(in.c_str(), "end\n") == 0)
+      break;
+    if (big_token == NULL) {
       char buffer[2048] = {0};
       read(out, buffer, 2048);
       in = buffer;
+      if (strcmp(in.c_str(), "") == 0)
+        break;
+      dup = strdup(in.c_str());
+      big_token = strtok_r(dup, "\r\n", save_big);
     }
-  }//end of else
-  count_rows -= 2;
+
+    char *token = strtok_r(big_token, ",", save);
+    while (token != NULL) {
+      if (first_raw) { count_colms++; }
+
+      input.push_back(atoi(token));
+      token = strtok_r(NULL, " ,", save);
+    }
+    first_raw = false;
+    big_token = strtok_r(NULL, "\r\n", save_big);
+  }
+  //count_rows -= 2;
+  delete save_big;
+  delete save;
+  //}
+  /*else {
+   //this is a short string send again and again till end
+   while (in.find("end") == std::string::npos) {
+     count_rows++;
+     char *dup = strdup(in.c_str());
+     char **save = new char *;
+     char *token = strtok_r(dup, ", \r\n", save);
+     while (token != NULL) {
+       if (first_raw) { count_colms++; }
+
+       input.push_back(atoi(token));
+       token = strtok_r(NULL, " ,\r\n", save);
+     }
+     free(dup);
+     first_raw = false;
+     char buffer[2048] = {0};
+     read(out, buffer, 2048);
+     in = buffer;
+   }
+ }//end of else*/
+  //count_rows -= 2;
   auto y = input.back();
   input.pop_back();
   auto x = input.back();
@@ -274,6 +281,8 @@ void MyClientHandler::handleClient(std::string in, int out) {
   x = input.back();
   input.pop_back();
   Point start(x, y);
+
+  count_rows = input.size() / count_colms;
 
   s->set_start_end(start, end);
   Matrix<double> mat(count_rows, count_colms, input);
@@ -301,6 +310,9 @@ void MyClientHandler::handleClient(std::string in, int out) {
 }
 }
 int boot::Main::main(int argc, char *argv[]) {
+  int port = 5600;
+  if (argc > 1)
+    port = atoi(argv[1]);
   FileCacheManager cache_manager(5);
   MatrixSolver *solver = new MatrixSolver();
 
@@ -308,7 +320,9 @@ int boot::Main::main(int argc, char *argv[]) {
   //server_side::MyTestClientHandler client_handler(&solver, &cache_manager);
 
   server_side::MyClientHandler client_handler(solver, &cache_manager);
-  server_side::MyParalelServer server(&client_handler);
+  server_side::MySerialServer server(&client_handler);
+
+//  server_side::MyParalelServer server(&client_handler);
 
   server.open(5600, &client_handler);
   while (server.is_running()) {

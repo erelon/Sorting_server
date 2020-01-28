@@ -134,18 +134,18 @@ template<class Solution>
 class A_Star : public General_Search_Algo<Solution> {
  public:
   Solution search(Searchable<Point> &searchable) {
-    std::priority_queue<A_Star_Node<Point>, std::vector<A_Star_Node<Point>>, A_Star_Node_Compare> *open_List =
-        new std::priority_queue<A_Star_Node<Point>, std::vector<A_Star_Node<Point>>, A_Star_Node_Compare>();
+    auto
+        open_List_alloc = new std::priority_queue<A_Star_Node<Point>, std::vector<A_Star_Node<Point>>, A_Star_Node_Compare>();
     std::list<A_Star_Node<Point>> all_Nodes;
     std::list<A_Star_Node<Point>> close_List;
     auto iter = new A_Star_Node<Point>(searchable.get_Init_State(), 0);
-    open_List->push(*iter);
+    open_List_alloc->push(*iter);
     all_Nodes.push_back(*iter);
     this->open_List->push(*iter->get_State());
-    while (!open_List->empty()) {
+    while (!open_List_alloc->empty()) {
       this->pop_Open_List();
-      A_Star_Node<Point> q = open_List->top();
-      open_List->pop();
+      A_Star_Node<Point> q = open_List_alloc->top();
+      open_List_alloc->pop();
       all_Nodes.remove(q);
 
       State<Point> **suc = searchable.get_All_Possible_States(*q.get_State());
@@ -174,7 +174,7 @@ class A_Star : public General_Search_Algo<Solution> {
           }
         }
         if (is_lower) {
-          open_List->push(suc_A);
+          open_List_alloc->push(suc_A);
           all_Nodes.push_back(suc_A);
           this->open_List->push(*suc_A.get_State());
         }
