@@ -31,7 +31,9 @@ class State {
   }
   ~State<T>() {}
   bool operator==(const State<T> &s) const { return to_string(state) == to_string(s.state); }
-  bool operator<(const State<T> &s) const { return cost < s.get_Cost(); }
+  bool operator<(const State<T> &s) const {
+    return cost < s.get_Cost();
+  }
   /*State<T> &operator=(const State<T> &s) {
     state = s.get_State();
     cost = s.get_Cost();
@@ -43,9 +45,16 @@ class State {
   friend std::string to_string(State<T> &t) { return std::to_string(t.get_Cost()); }
 };
 
+class StateComparator {
+ public:
+  int operator()(const State<Point> &p1, const State<Point> &p2) {
+    return !(p1.get_Cost() < p2.get_Cost());
+  }
+};
+
 template<>
 struct std::hash<State<Point>> {
-  size_t operator()(const State<Point> &obj) const {
+  size_t operator()(State<Point> obj) const {
     return hash<int>()(obj.get_Cost());
   }
 };

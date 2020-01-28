@@ -18,17 +18,19 @@ class Searchable_Matrix : public Searchable<S> {
     this->start_Point = startP;
     this->end_Point = endP;
   }
-  State<S> *get_Init_State() { return new State<S>(this->start_Point, 0, nullptr); }
+  State<S> *get_Init_State() {
+    return new State<S>(this->start_Point, this->mat->costOf(start_Point), nullptr);
+  }
   State<S> get_Goal_State() { return State<S>(this->end_Point, 0, nullptr); }
   bool is_Goal_State(State<S> is) { return (this->end_Point == is.get_State()); }
   State<S> **get_All_Possible_States(State<S> &current_State) {
     State<S> **ret = new State<S> *[4];
 
     std::list<Point> offsets;
-    offsets.emplace_back(1, 0); // Down
-    offsets.emplace_back(-1, 0); // Up
-    offsets.emplace_back(0, 1); // Right
-    offsets.emplace_back(0, -1); // Left
+    offsets.emplace_back(0, 1); // Down
+    offsets.emplace_back(1, 0); // Right
+    offsets.emplace_back(-1, 0); // Left
+    offsets.emplace_back(0, -1); // Up
 
     int i = 0;
     for (auto iter : offsets) {
@@ -42,7 +44,7 @@ class Searchable_Matrix : public Searchable<S> {
     return ret;
   }
   bool in_Metrix_Bounds(Point p) {
-    return (p.getX() >= 0 && p.getY() >= 0 && p.getX() < mat->getnumOfRows() && p.getY() < mat->getnumOfCols());
+    return (p.getX() >= 0 && p.getY() >= 0 && p.getX() < mat->getnumOfCols() && p.getY() < mat->getnumOfRows());
   }
 };
 

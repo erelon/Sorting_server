@@ -55,6 +55,56 @@ int accept_client(int socketfd, sockaddr_in address) {
 
 namespace server_side {
 
+class MyParalelServer : public Server {
+ private:
+  ClientHandler *client_handler;
+  sockaddr_in address;
+  bool to_run = false;
+ public:
+  MyParalelServer(ClientHandler *cl);
+  int run(int socketfd);
+  int open(int port, ClientHandler *c);
+  int stop();
+  void run_adapter(std::string Data, int client);
+};
+MyParalelServer::MyParalelServer(ClientHandler *cl) {
+  this->client_handler = cl;
+}
+
+int MyParalelServer::open(int port, ClientHandler *c) {
+  this->to_run = true;
+  int socketfd = open_server(port, &address);
+  run(socketfd);
+}
+
+int MyParalelServer::run(int socketfd) {
+  int numOfClient = 0;
+  while (to_run) {
+    int client = accept_client(socketfd, address);
+    numOfClient++;
+    if (client == -1) {
+      //add timeout
+      sleep(1);
+      continue;
+    }
+
+    char buffer[2048] = {0};
+    read(client, buffer, 1024);
+    std::string Data(buffer);
+    std::thread take_client(&MyParalelServer::run_adapter, this, Data, client);
+    take_client.detach();
+  }
+  close(socketfd);
+}
+
+void MyParalelServer::run_adapter(std::string Data, int client) {
+  this->client_handler->handleClient(Data, client);
+}
+
+int MyParalelServer::stop() {
+  this->to_run = false;
+}
+
 class MySerialServer : Server {
  private:
   ClientHandler *client_handler;
@@ -149,23 +199,55 @@ void MyClientHandler::handleClient(std::string in, int out) {
   int count_colms = 0, count_rows = 0;
   std::string answer;
   bool first_raw = true;
-  while (in.find("end") == std::string::npos) {
 
-    count_rows++;
-
+  if (in.find("end") == std::string::npos) {
+    //this is a long string with end in the end
     char *dup = strdup(in.c_str());
-    char *token = strtok(dup, ", \r\n");
-    while (token != NULL) {
-      if (first_raw) { count_colms++; }
-      input.push_back(atoi(token));
-      token = strtok(NULL, " ,\r\n");
+    char **save_big = new char *;
+    char **save = new char *;
+    char *big_token = strtok_r(dup, "\r\n", save_big);
+
+    while (big_token == NULL || strcmp(big_token, "end") != 0) {
+      if (big_token == NULL) {
+        char buffer[2048] = {0};
+        read(out, buffer, 2048);
+        in = buffer;
+        dup = strdup(in.c_str());
+        big_token = strtok_r(dup, "\r\n", save_big);
+      }
+
+      char *token = strtok_r(big_token, ",", save);
+      while (token != NULL) {
+        if (first_raw) { count_colms++; }
+
+        input.push_back(atoi(token));
+        token = strtok_r(NULL, " ,", save);
+      }
+      first_raw = false;
+      count_rows++;
+      big_token = strtok_r(NULL, "\r\n", save_big);
     }
-    free(dup);
-    first_raw = false;
-    char buffer[2048] = {0};
-    read(out, buffer, 1024);
-    in = buffer;
-  }
+    count_rows -= 2;
+  } else {
+    //this is a short string send again and again till end
+    while (in.find("end") == std::string::npos) {
+      count_rows++;
+      char *dup = strdup(in.c_str());
+      char **save = new char *;
+      char *token = strtok_r(dup, ", \r\n", save);
+      while (token != NULL) {
+        if (first_raw) { count_colms++; }
+
+        input.push_back(atoi(token));
+        token = strtok_r(NULL, " ,\r\n", save);
+      }
+      free(dup);
+      first_raw = false;
+      char buffer[2048] = {0};
+      read(out, buffer, 2048);
+      in = buffer;
+    }
+  }//end of else
   count_rows -= 2;
   auto y = input.back();
   input.pop_back();
@@ -183,14 +265,25 @@ void MyClientHandler::handleClient(std::string in, int out) {
   s->set_start_end(start, end);
   Matrix<double> mat(count_rows, count_colms, input);
   std::string string_Mat = to_string(mat);
+  string_Mat += to_string(start) + to_string(end);
 
+  std::mutex mute;
+  //while (!mute.try_lock());
   if (this->cache_manager->is_in_cache(string_Mat)) {
     answer = cache_manager->load(string_Mat);
+    mute.unlock();
     write(out, answer.c_str(), answer.length());
+    return;
   }
+  //mute.unlock();
 
   answer = s->solve(mat);
+  //bool check = mute.try_lock();
+  //while (check == false) {
+   // check = mute.try_lock();
+  //}
   this->cache_manager->save(string_Mat, answer);
+  //mute.unlock();
   write(out, answer.c_str(), answer.length());
 }
 }
@@ -202,7 +295,7 @@ int boot::Main::main(int argc, char *argv[]) {
   //server_side::MyTestClientHandler client_handler(&solver, &cache_manager);
 
   server_side::MyClientHandler client_handler(solver, &cache_manager);
-  server_side::MySerialServer server(&client_handler);
+  server_side::MyParalelServer server(&client_handler);
 
   server.open(5600, &client_handler);
   while (true);

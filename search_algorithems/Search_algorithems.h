@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <list>
 #include <queue>
+#include <algorithm>
 #include "Searcher.h"
 #include "../Matrix.h"
 
@@ -17,7 +18,7 @@ class General_Search_Algo : public Searcher<Solution> {
  private:
   int evaluated_Nodes;
  protected:
-  std::priority_queue<State<Point>> *open_List;
+  std::priority_queue<State<Point>, std::vector<State<Point>>, StateComparator> *open_List;
   State<Point> *pop_Open_List() {
     evaluated_Nodes++;
     State<Point> *temp = new State<Point>(open_List->top());
@@ -27,7 +28,7 @@ class General_Search_Algo : public Searcher<Solution> {
 
  public:
   General_Search_Algo<Solution>() {
-    this->open_List = new std::priority_queue<State<Point>>();
+    this->open_List = new std::priority_queue<State<Point>, std::vector<State<Point>>, StateComparator>();
     this->evaluated_Nodes = 0;
   }
   int Open_List_Size() { return open_List->size(); };
@@ -67,37 +68,39 @@ class General_Search_Algo : public Searcher<Solution> {
   }
 };
 
+//&& visited.find(*all_Possible_States[i]) == visited.end()
+
+
 template<class Solution>
 class BFS : public General_Search_Algo<Solution> {
  public:
   Solution search(Searchable<Point> &searchable) {
-    std::unordered_set<State<Point>> done;
+    std::vector<Point> done;
     State<Point> *u;
     this->open_List->push(*searchable.get_Init_State());
-    std::unordered_set<State<Point>> visited;
+    //std::unordered_set<State<Point>> visited;
 
     while (!this->open_List->empty()) {
       u = (this->pop_Open_List());
-      if (done.find(*u) != done.end()) {
+      if (std::find(done.begin(), done.end(), u->get_State()) != done.end()) {
         //this u was checked already
         continue;
       }
       if (searchable.is_Goal_State(*u))
         return this->backtrace(*u);
       else {
-        visited.insert(*u);
         State<Point> **all_Possible_States = searchable.get_All_Possible_States(*u);
         for (int i = 0; i < 4; i++) {
-          if (*(all_Possible_States + i) != nullptr) {
-            if (visited.find(*all_Possible_States[i]) == visited.end()) {//check if v was not visited yet
-              visited.insert(*all_Possible_States[i]);
-              this->open_List->push(*all_Possible_States[i]);
-            }
+          if (all_Possible_States[i] != nullptr
+              && std::find(done.begin(), done.end(), all_Possible_States[i]->get_State()) == done.end()) {
+            //visited.insert(*all_Possible_States[i]);
+            this->open_List->push(*all_Possible_States[i]);
           }
         }
+        done.push_back(u->get_State());
       }
-      done.insert(*u);
     }
+    return "no path found";
   }
 };
 
@@ -120,11 +123,19 @@ class A_Star_Node {
   bool operator==(const A_Star_Node<T> &ASN) const { return (t == ASN.t && hurisic == ASN.hurisic); }
 };
 
+class A_Star_Node_Compare {
+ public:
+  int operator()(A_Star_Node<Point> p1, A_Star_Node<Point> p2) {
+    return !(p1.getH() < p2.getH());
+  }
+};
+
 template<class Solution>
 class A_Star : public General_Search_Algo<Solution> {
  public:
   Solution search(Searchable<Point> &searchable) {
-    std::priority_queue<A_Star_Node<Point>> *open_List = new std::priority_queue<A_Star_Node<Point>>();
+    std::priority_queue<A_Star_Node<Point>, std::vector<A_Star_Node<Point>>, A_Star_Node_Compare> *open_List =
+        new std::priority_queue<A_Star_Node<Point>, std::vector<A_Star_Node<Point>>, A_Star_Node_Compare>();
     std::list<A_Star_Node<Point>> all_Nodes;
     std::list<A_Star_Node<Point>> close_List;
     auto iter = new A_Star_Node<Point>(searchable.get_Init_State(), 0);
@@ -145,7 +156,7 @@ class A_Star : public General_Search_Algo<Solution> {
           return this->backtrace(*suc[i]);
         }
         A_Star_Node<Point> suc_A
-            (new State<Point>(suc[i]->get_State(), q.get_State()->get_Cost() + suc[i]->get_Cost(), suc[i]->came_from()),
+            (new State<Point>(suc[i]->get_State(), suc[i]->get_Cost(), suc[i]->came_from()),
              abs(suc[i]->get_State().getX() - searchable.get_Goal_State().get_State().getX())
                  + abs(suc[i]->get_State().getY() - searchable.get_Goal_State().get_State().getY()));
         bool is_lower = true;
@@ -170,6 +181,7 @@ class A_Star : public General_Search_Algo<Solution> {
       }
       close_List.push_back(q);
     }
+    return "no path found";
   }
 };
 
@@ -177,7 +189,29 @@ template<class Solution>
 class DFS : public General_Search_Algo<Solution> {
  public:
   Solution search(Searchable<Point> &searchable) {
+    State<Point> *u;;
+    std::vector<Point> visited;
+    std::stack<State<Point> *> open_stack;
+    this->open_List->push(*searchable.get_Init_State());
+    open_stack.push(searchable.get_Init_State());
 
+    while (!open_stack.empty()) {
+      u = open_stack.top();
+      open_stack.pop();
+      this->pop_Open_List();
+      if (searchable.is_Goal_State(*u))
+        return this->backtrace(*u);
+      auto child = searchable.get_All_Possible_States(*u);
+      for (int i = 0; i < 4; i++) {
+        if (child[i] == nullptr)
+          continue;
+        if (std::find(visited.begin(), visited.end(), child[i]->get_State()) == visited.end()) {
+          visited.push_back(child[i]->get_State());
+          open_stack.push(child[i]);
+          this->open_List->push(*child[i]);
+        }
+      }
+    }
   }
 };
 

@@ -24,12 +24,28 @@ class Point {
     this->x = p.getX();
     this->y = p.getY();
   }
-  bool operator==(Point obj) {
+  bool operator<(const Point &p2) {
+    if (this->getX() > p2.getX()) {
+      return this->getX() > p2.getX();
+    }
+    return this->getY() > p2.getY();
+  }
+  bool const operator==(const Point &obj) {
     if (this->x == obj.x && this->y == obj.y)
       return true;
     else return false;
   }
+  std::string to_string() {
+    return std::to_string(this->getX()) + " " + std::to_string(this->getY());
+  }
   friend std::string to_string(Point const &self) { return std::to_string(self.x) + " " + std::to_string(self.y); }
+};
+
+template<>
+struct std::hash<Point> {
+  size_t operator()(const Point &obj) const {
+    return hash<int>()(atoi(to_string(obj).c_str()));
+  }
 };
 
 //T must have a cost with get_Cost() func
@@ -62,7 +78,7 @@ Matrix<T>::Matrix(int rows, int colms, std::vector<T> data) {
   auto iterData = data.begin();
   for (int i = 0; i < numOfRows; i++)
     for (int j = 0; j < numOfColms; j++) {
-      Mat[i][j] = *iterData;
+      Mat[j][i] = *iterData;
       iterData++;
     }
 }
@@ -70,7 +86,7 @@ Matrix<T>::Matrix(int rows, int colms, std::vector<T> data) {
 template<class T>
 Matrix<T>::~Matrix<T>() {
   for (int i = numOfRows - 1; i >= 0; i--) {
-    delete Mat[i];
+    //delete Mat[i];
   }
   delete Mat;
 }
@@ -88,6 +104,6 @@ std::string Matrix<T>::to_String() {
 }
 
 template<class T>
-std::string to_string(T &t) { return std::to_string(t.getCost()); }
+std::string to_string(T &t) { return t.to_string(); }
 
 #endif //SORTING_SERVER__MATRIX_H_

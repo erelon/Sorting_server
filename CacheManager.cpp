@@ -20,7 +20,8 @@ FileCacheManager::~FileCacheManager() {
 void FileCacheManager::save(std::string q, std::string a) {
   std::string key;
   //craete a smart key for the object
-  this->insert(q, a);
+  std::hash<std::string> hasher;
+  this->insert(std::to_string(hasher(q)), a);
 }
 
 void FileCacheManager::insert(std::string key, std::string obj) {
@@ -56,8 +57,10 @@ bool FileCacheManager::is_in_cache(std::string to_search) {
   if (hash.find(to_search) != hash.end())
     return true;
 
+  std::hash<std::string> hasher;
+
   std::fstream stream;
-  std::string npath(cache_path + std::to_string(cache_num) + to_search);
+  std::string npath(cache_path + std::to_string(cache_num) + std::to_string(hasher(to_search)));
   //checking if the key was created once:
   FILE *check = fopen(npath.c_str(), "rb");
   if (check == nullptr) {
@@ -68,14 +71,15 @@ bool FileCacheManager::is_in_cache(std::string to_search) {
 }
 
 std::string FileCacheManager::load(std::string key) {
+  std::hash<std::string> hasher;
   //if the key is in the cache- return, else- search in filesystem
-  if (hash.find(key) != hash.end()) {
-    LRU->remove(key);
-    LRU->push_front(key);
-    return hash[key];
+  if (hash.find(std::to_string(hasher(key))) != hash.end()) {
+    LRU->remove(std::to_string(hasher(key)));
+    LRU->push_front(std::to_string(hasher(key)));
+    return hash[std::to_string(hasher(key))];
   } else {
     std::fstream stream;
-    std::string npath(cache_path + std::to_string(cache_num) + key);
+    std::string npath(cache_path + std::to_string(cache_num) + std::to_string(hasher(key)));
     //checking if the key was created once:
     FILE *check = fopen(npath.c_str(), "rb");
     if (check == nullptr)
@@ -88,7 +92,7 @@ std::string FileCacheManager::load(std::string key) {
     std::string t = "", temp;
     stream >> temp;
     while (stream) {
-      t += temp +" ";
+      t += temp + " ";
       stream >> temp;
     }
     t.pop_back();
@@ -100,8 +104,8 @@ std::string FileCacheManager::load(std::string key) {
       hash.erase(LRU->back());
       LRU->pop_back();
     }
-    hash[key] = t;
-    LRU->push_front(key);
-    return hash[key];
+    hash[std::to_string(hasher(key))] = t;
+    LRU->push_front(std::to_string(hasher(key)));
+    return hash[std::to_string(hasher(key))];
   }
 }
