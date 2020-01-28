@@ -12,7 +12,7 @@ If you want to set a block that cannot be reached, set it to -1.
 Write all of the lines and then after an 'enter' the points (with an 'enter' between them).
 At the end of the input- add 'end'.
 
-Here is an example of a valid input: [matrix](\matrix_expample.txt)
+Here is an example of a valid input: [matrix](/matrix_expamle.txt)
 
 The server accepts multiple connections (up till 10 at a time) and automatically shut down after 2 minutes.
 
