@@ -44,11 +44,17 @@ int open_server(int port, sockaddr_in *p_in) {
 int accept_client(int socketfd, sockaddr_in address) {
   // accepting a client
   socklen_t clientAddrLen = sizeof(address);
+
+  struct timeval tv;
+  tv.tv_sec = 10;
+  tv.tv_usec = 0;
+  setsockopt(socketfd, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof tv);
   int client_socket = accept(socketfd, (struct sockaddr *) &address,
                              &clientAddrLen);
 
   if (client_socket == -1) {
-    std::cerr << strerror(errno) << std::endl;
+    //std::cerr << strerror(errno) << std::endl;
+    //timeout
     return -1;
   }
 }
@@ -65,8 +71,14 @@ class MyParalelServer : public Server {
   int run(int socketfd);
   int open(int port, ClientHandler *c);
   int stop();
+  bool is_running();
   void run_adapter(std::string Data, int client);
 };
+
+bool MyParalelServer::is_running() {
+  return to_run;
+}
+
 MyParalelServer::MyParalelServer(ClientHandler *cl) {
   this->client_handler = cl;
 }
@@ -83,8 +95,7 @@ int MyParalelServer::run(int socketfd) {
     int client = accept_client(socketfd, address);
     numOfClient++;
     if (client == -1) {
-      //add timeout
-      sleep(1);
+      this->stop();
       continue;
     }
 
@@ -280,7 +291,7 @@ void MyClientHandler::handleClient(std::string in, int out) {
   answer = s->solve(mat);
   //bool check = mute.try_lock();
   //while (check == false) {
-   // check = mute.try_lock();
+  // check = mute.try_lock();
   //}
   this->cache_manager->save(string_Mat, answer);
   //mute.unlock();
@@ -298,6 +309,8 @@ int boot::Main::main(int argc, char *argv[]) {
   server_side::MyParalelServer server(&client_handler);
 
   server.open(5600, &client_handler);
-  while (true);
+  while (server.is_running()) {
+    sleep(2);
+  }
   delete solver;
 }
